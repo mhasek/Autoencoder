@@ -6,13 +6,13 @@ def generator(x, batch_size, is_train, reuse):
 
   with tf.variable_scope('GEN', reuse=reuse) as vs1:
     with tf.variable_scope('fc1', reuse=reuse):
-      hidden_num = 128
+      hidden_num = 64
       x = fc_factory(x, 4*hidden_num, is_train, reuse)
-      x = tf.reshape(x, shape = [batch_size,2,2,128])
+      x = tf.reshape(x, shape = [batch_size,2,2,64])
       print (x.shape)
 
     with tf.variable_scope('deconv1', reuse=reuse):
-      hidden_num /= 4
+      hidden_num /= 2
       x = t_conv_factory(x, hidden_num,[batch_size,4,4,32] ,3, 1, is_train, reuse)
       print (x.shape)
 

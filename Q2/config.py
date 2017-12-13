@@ -34,7 +34,7 @@ train_arg.add_argument('--use_gpu', type=str2bool, default=True)
 # Misc
 misc_arg = add_argument_group('Misc')
 misc_arg.add_argument('--load_path', type=str, default='')
-misc_arg.add_argument('--log_step', type=int, default=10)
+misc_arg.add_argument('--log_step', type=int, default=100)
 misc_arg.add_argument('--save_step', type=int, default=1000)
 misc_arg.add_argument('--log_level', type=str, default='INFO', choices=['INFO', 'DEBUG', 'WARN'])
 misc_arg.add_argument('--log_dir', type=str, default='logs')
