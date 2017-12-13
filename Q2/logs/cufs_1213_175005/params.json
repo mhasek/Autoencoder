@@ -1,0 +1,22 @@
+{
+    "batch_size": 50, 
+    "batch_size_eval": 50, 
+    "data_dir": "/home/mhasek/Documents/CIS680/datasets/", 
+    "data_path": "/home/mhasek/Documents/CIS680/datasets/cufs", 
+    "dataset": "cufs", 
+    "epoch_step": 100, 
+    "is_train": true, 
+    "load_path": "", 
+    "log_dir": "logs", 
+    "log_level": "INFO", 
+    "log_step": 100, 
+    "lr": 0.001, 
+    "max_step": 5000, 
+    "min_lr": 0.0001, 
+    "model_dir": "logs/cufs_1213_175005", 
+    "model_name": "cufs_1213_175005", 
+    "random_seed": 0, 
+    "save_step": 1000, 
+    "use_gpu": true, 
+    "wd_ratio": 0.05
+}
