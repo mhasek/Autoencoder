@@ -6,34 +6,34 @@ def generator(x, batch_size, is_train, reuse):
 
   with tf.variable_scope('GEN', reuse=reuse) as vs1:
     with tf.variable_scope('fc1', reuse=reuse):
-      hidden_num = 128
-      x = fc_factory(x, hidden_num, is_train, reuse)
-      x = tf.reshape(x, shape = [batch_size,1,1,128])
+      hidden_num = 256
+      x = fc_factory(x, 4*hidden_num, is_train, reuse)
+      x = tf.reshape(x, shape = [batch_size,2,2,256])
       print (x.shape)
 
     with tf.variable_scope('deconv1', reuse=reuse):
-      hidden_num /= 2
-      x = t_conv_factory(x, hidden_num,[batch_size,2,2,64] ,3, 1, is_train, reuse)
+      hidden_num /= 8
+      x = t_conv_factory(x, hidden_num,[batch_size,2,2,32] ,3, 1, is_train, reuse)
       print (x.shape)
 
     with tf.variable_scope('deconv2', reuse=reuse):
       hidden_num /= 2
-      x = t_conv_factory(x, hidden_num,[batch_size,4,4,32] ,3, 1, is_train, reuse)
+      x = t_conv_factory(x, hidden_num,[batch_size,4,4,16] ,3, 1, is_train, reuse)
       print (x.shape)
 
     with tf.variable_scope('deconv3', reuse=reuse):
       hidden_num /= 2
-      x = t_conv_factory(x, hidden_num,[batch_size,8,8,16] ,3, 1, is_train, reuse)
+      x = t_conv_factory(x, hidden_num,[batch_size,8,8,8] ,3, 1, is_train, reuse)
       print (x.shape)
 
     with tf.variable_scope('deconv4', reuse=reuse):
       hidden_num /= 2
-      x = t_conv_factory(x, hidden_num,[batch_size,16,16,8] ,3, 1, is_train, reuse)
+      x = t_conv_factory(x, hidden_num,[batch_size,16,16,4] ,3, 1, is_train, reuse)
       print (x.shape)
 
     with tf.variable_scope('deconv5', reuse=reuse):
       hidden_num /= 2
-      x = t_conv_factory(x, hidden_num,[batch_size,32,32,4] ,3, 1, is_train, reuse)
+      x = t_conv_factory(x, hidden_num,[batch_size,32,32,2] ,3, 1, is_train, reuse)
       print (x.shape)
 
     with tf.variable_scope('deconv6', reuse=reuse):
@@ -49,7 +49,7 @@ def discriminator(x, batch_size, is_train, reuse):
   
   with tf.variable_scope('DIS', reuse=reuse) as vs2:
     with tf.variable_scope('conv1', reuse=reuse):
-      hidden_num = 4
+      hidden_num = 2
       x = conv_factory_leaky(x, hidden_num, 3, 2, is_train, reuse)
       x = tf.nn.max_pool(x, ksize=[1,2,2,1], strides=[1,1,1,1], padding='SAME')
       print (x.shape)
@@ -79,11 +79,11 @@ def discriminator(x, batch_size, is_train, reuse):
       x = tf.nn.max_pool(x, ksize=[1,2,2,1], strides=[1,1,1,1], padding='SAME')
       print (x.shape)
 
-    # with tf.variable_scope('conv6', reuse=reuse):
-    #   hidden_num *= 2
-    #   x = conv_factory_leaky(x, hidden_num, 3, 2, is_train, reuse)
-    #   x = tf.nn.max_pool(x, ksize=[1,2,2,1], strides=[1,1,1,1], padding='SAME')
-    #   print (x.shape)
+    with tf.variable_scope('conv6', reuse=reuse):
+      hidden_num *= 2
+      x = conv_factory_leaky(x, hidden_num, 3, 2, is_train, reuse)
+      x = tf.nn.max_pool(x, ksize=[1,2,2,1], strides=[1,1,1,1], padding='SAME')
+      print (x.shape)
 
     # with tf.variable_scope('fc1', reuse=reuse):
     #   x = tf.reshape(x, shape = [batch_size, -1])

@@ -76,11 +76,16 @@ class Trainer(object):
 
     G_z = self.G_z
 
-    self.D_x, self.D_var = discriminator(x, self.batch_size, 
+    D_in = tf.concat([G_z,x], axis=0)
+
+    D_out, self.D_var = discriminator(D_in, self.batch_size*2, 
       is_train=True, reuse=False) 
 
-    self.D_G_z, D_var = discriminator(G_z, self.batch_size, 
-      is_train=False, reuse=True)
+    self.D_G_z = D_out[0:self.batch_size]
+    self.D_x = D_out[self.batch_size:]    
+
+    # self.D_G_z, D_var = discriminator(G_z, self.batch_size, 
+    #   is_train=False, reuse=True)
 
 
 
