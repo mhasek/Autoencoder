@@ -117,8 +117,8 @@ class Trainer(object):
 
     # pdb.set_trace()
 
-    D_G_z_mean = tf.reduce_mean(self.D_G_z)
-    D_x_mean = tf.reduce_mean(self.D_x)
+    D_G_z_mean = tf.reduce_mean(tf.nn.sigmoid(self.D_G_z))
+    D_x_mean = tf.reduce_mean(tf.nn.sigmoid(self.D_x))
 
     self.summary_op = tf.summary.merge([
       tf.summary.scalar("lr", self.lr),
@@ -157,7 +157,7 @@ class Trainer(object):
         # 'wd_optim': self.wd_optim,
         'G_loss': self.G_loss,
         # 'D_x': self.D_x,
-        # 'D_loss': self.D_loss,
+        'D_loss': self.D_loss,
         # 'D_G_z':self.D_G_z,
         # 'G_z': self.G_z
         }
@@ -177,17 +177,17 @@ class Trainer(object):
           'lr': self.lr,
           'summary': self.summary_op })
 
-      # if step > 2000 and D_loss < 0.1:
-      #    result = self.sess.run(fetch_dict_gen, feed_dict =feed_dict )
-      # else:
-      result = self.sess.run(fetch_dict_disc)#, feed_dict =feed_dict )
-      result = self.sess.run(fetch_dict_disc)#, feed_dict =feed_dict )
+      if (step > 2000 and step <= 3000 and D_loss < 0.1) or step < 10:
+        result = self.sess.run(fetch_dict_gen)#, feed_dict =feed_dict )
+        G_loss = result['G_loss']
+        D_loss = result['D_loss']
+      else:
+        result = self.sess.run(fetch_dict_disc)#, feed_dict =feed_dict )
+        result = self.sess.run(fetch_dict_disc)#, feed_dict =feed_dict )
+        D_loss = result['D_loss']
+        result = self.sess.run(fetch_dict_gen)#, feed_dict =feed_dict )
+        G_loss = result['G_loss']
 
-      D_loss = result['D_loss']
-
-      result = self.sess.run(fetch_dict_gen)#, feed_dict =feed_dict )
-
-      G_loss = result['G_loss']
       # D_x = result['D_x']
       # D_G_z = result['D_G_z']
       # G_z = result['G_z']
@@ -246,15 +246,20 @@ class Trainer(object):
 
 
   def gen_image(self):
-    self.saver.restore(self.sess, self.model_dir)
+    self.saver.restore(self.sess, self.model_dir + '/model.ckpt-0')
+    z1 = np.random.normal(0,1,100).reshape(1,100)
+    z2 = np.random.normal(0,1,100).reshape(1,100)
 
-    noise_in= np.random.multivariate_normal(mean=np.zeros(100), cov=np.eye(100), size = (self.batch_size_eval))
-    feed_dict_gen = {self.eval_gen_in : noise_in}
+    for i,alpha in enumerate(np.linspace(0, 1,20)):
+      noise_in =  np.random.normal(0,alpha,100).reshape(1,100)
+      feed_dict_gen = {self.z_test : noise_in}
+      fetch_dict_gen = {'G_z': self.G_z_test}
+      result = self.sess.run(fetch_dict_gen,feed_dict=feed_dict_gen)
+      result = result['G_z']
 
-    fetch_dict_gen = {'gen_out': self.eval_gen_out}
-
-    result = self.sess.run(fetch_dict_gen,feed_dict=feed_dict_gen)
-    
-    result = result['gen_out']
-
-
+      # pdb.set_trace()
+      plt.figure(1)
+      plt.title('img%d'%(i))
+      plt.imshow(result[0,:,:,0], cmap='gray')
+      plt.savefig(self.config.model_dir + '/gen_out_im_%d'%(i) +'.png' )
+      plt.close('all')
