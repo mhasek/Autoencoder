@@ -229,10 +229,34 @@ class Trainer(object):
         feed_dict_gen = {self.z_test : z_test}
 
         fetch_dict_gen = {'G_z': self.G_z_test,
-                          'D_G_z': self.D_G_z_test}
+                          'D_G_z': self.D_G_z_test,
+                          'image': self.x}
+
 
         result = self.sess.run(fetch_dict_gen,feed_dict=feed_dict_gen)
-        
+
+        images = np.zeros((64*10,64*10))
+        gen_images = np.zeros((64*10,64*10))
+
+        for i in range(10):
+          for j in range(10):
+            im = result['image'][i*j,:,:,0]
+            images[i*64:(i+1)*64,j*64:(j+1)*64] = im 
+            gen_im = result['G_z'][i*j,:,:,0]
+            gen_images[i*64:(i+1)*64,j*64:(j+1)*64] = gen_im
+
+        plt.figure(1)
+        plt.title('org_imgs_iter_%d'%(step))
+        plt.imshow(images, cmap='gray')
+        plt.savefig(self.config.model_dir + '/org_imgs_iter_%d'%(step) +'.png' )
+        plt.close('all')
+
+        plt.figure(1)
+        plt.title('gen_imgs_iter_%d'%(step))
+        plt.imshow(gen_images, cmap='gray')
+        plt.savefig(self.config.model_dir + '/gen_imgs_iter_%d'%(step) +'.png' )
+        plt.close('all')
+
         D_G_z = np.mean(result['D_G_z'])
 
         sys.stdout.flush()
@@ -247,11 +271,11 @@ class Trainer(object):
 
   def gen_image(self):
     self.saver.restore(self.sess, self.model_dir + '/model.ckpt-0')
-    z1 = np.random.normal(0,1,100).reshape(1,100)
-    z2 = np.random.normal(0,1,100).reshape(1,100)
+    z1 = np.random.normal(0,1,100).reshape(self.batch_size_eval,100)
+    z2 = np.random.normal(0,1,100).reshape(self.batch_size_eval,100)
 
     for i,alpha in enumerate(np.linspace(0, 1,20)):
-      noise_in =  np.random.normal(0,alpha,100).reshape(1,100)
+      noise_in =  np.random.normal(0,alpha,(self.batch_size_eval,100)).reshape(1,100)
       feed_dict_gen = {self.z_test : noise_in}
       fetch_dict_gen = {'G_z': self.G_z_test}
       result = self.sess.run(fetch_dict_gen,feed_dict=feed_dict_gen)

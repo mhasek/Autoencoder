@@ -12,22 +12,22 @@ def generator(x, batch_size, is_train, reuse):
       print (x.shape)
 
     with tf.variable_scope('deconv1', reuse=reuse):
-      hidden_num /= 8
-      x = t_conv_factory(x, hidden_num,[batch_size,4,4,128] ,3, 1, is_train, reuse)
+      hidden_num /= 4
+      x = t_conv_factory(x, hidden_num,[batch_size,4,4,256] ,3, 1, is_train, reuse)
       print (x.shape)
 
     with tf.variable_scope('deconv2', reuse=reuse):
       hidden_num /= 4
-      x = t_conv_factory(x, hidden_num,[batch_size,8,8,32] ,3, 1, is_train, reuse)
+      x = t_conv_factory(x, hidden_num,[batch_size,8,8,64] ,3, 1, is_train, reuse)
       print (x.shape)
 
     with tf.variable_scope('deconv3', reuse=reuse):
       hidden_num /= 4
-      x = t_conv_factory(x, hidden_num,[batch_size,16,16,8] ,3, 1, is_train, reuse)
+      x = t_conv_factory(x, hidden_num,[batch_size,16,16,16] ,3, 1, is_train, reuse)
       print (x.shape)
 
     with tf.variable_scope('deconv4', reuse=reuse):
-      hidden_num /= 2
+      hidden_num /= 4
       x = t_conv_factory(x, hidden_num,[batch_size,32,32,4] ,3, 1, is_train, reuse)
       print (x.shape)
 
@@ -85,13 +85,13 @@ def discriminator(x, batch_size, is_train, reuse):
       # x = tf.nn.avg_pool(x, ksize=[1,2,2,1], strides=[1,1,1,1], padding='SAME')
       print (x.shape)
 
-    # with tf.variable_scope('fc1', reuse=reuse):
-    #   x = tf.reshape(x, shape = [batch_size, -1])
-    #   x = fc_factory_leaky(x, 32, is_train, reuse)
-    #   print (x.shape)
+    with tf.variable_scope('fc1', reuse=reuse):
+      x = tf.reshape(x, shape = [batch_size, -1])
+      x = fc_factory_leaky(x, 100, is_train, reuse)
+      print (x.shape)
 
     with tf.variable_scope('fc_out', reuse=reuse):
-      x = tf.reshape(x, shape = [batch_size, -1])
+      # x = tf.reshape(x, shape = [batch_size, -1])
       x = fc_factory_noact(x, 1, is_train, reuse)
       print (x.shape)
       # x = tf.nn.sigmoid(x)

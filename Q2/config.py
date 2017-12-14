@@ -18,12 +18,12 @@ net_arg = add_argument_group('Network')
 # Data
 data_arg = add_argument_group('Data')
 data_arg.add_argument('--dataset', type=str, default='cufs', choices=['celeba', 'cufs'])
-data_arg.add_argument('--batch_size', type=int, default=50)
-data_arg.add_argument('--batch_size_eval', type=int, default=1)
+data_arg.add_argument('--batch_size', type=int, default=100)
+data_arg.add_argument('--batch_size_eval', type=int, default=100)
 
 # Training / test parameters
 train_arg = add_argument_group('Training')
-train_arg.add_argument('--is_train', type=str2bool, default=False)
+train_arg.add_argument('--is_train', type=str2bool, default=True)
 train_arg.add_argument('--max_step', type=int, default=5000)
 train_arg.add_argument('--epoch_step', type=int, default=100)
 train_arg.add_argument('--lr', type=float, default=1e-3)
