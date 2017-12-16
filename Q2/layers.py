@@ -109,6 +109,7 @@ def t_conv_factory(x, hidden_num, output_shape, kernel_size, stride, is_train, r
 #        fused=True, scope=vs, updates_collections=None)
   x = batch_norm(x, is_train=is_train)
   x = tf.nn.relu(x)
+  # x = leaky_relu(x)
 #  x = tf.nn.sigmoid(x)
   return x
 
