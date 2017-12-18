@@ -74,6 +74,10 @@ class Trainer(object):
 
     z = self.z
 
+    # g_y = self.g_y
+    # d_y = self.d_y
+
+
     self.G_z, self.G_var = self.generator(z, self.batch_size, 
       is_train = True, reuse = False)
 
@@ -87,21 +91,26 @@ class Trainer(object):
     self.D_G_z = D_out[0:self.batch_size]
     self.D_x = D_out[self.batch_size:]    
 
-    # self.D_G_z, D_var = discriminator(G_z, self.batch_size, 
-    #   is_train=False, reuse=True)
+    if self.config.is_LSGAN :
+      b = 1
+      a = 0
+      c = 1
+      D_loss_real = 0.5 * tf.reduce_mean((self.D_x - b)**2)
+      D_loss_fake = 0.5 * tf.reduce_mean((self.D_G_z - a)**2)
+      self.G_loss = 0.5 * tf.reduce_mean((self.D_G_z - c)**2)
 
+    else:
+      D_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+        logits = self.D_x,labels=tf.ones_like(self.D_x)))
 
+      D_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+        logits = self.D_G_z,labels=tf.zeros_like(self.D_G_z)))
 
-    D_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
-      logits = self.D_x,labels=tf.ones_like(self.D_x)))
+      self.G_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+        logits = self.D_G_z,labels=tf.ones_like(self.D_G_z)))
 
-    D_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
-      logits = self.D_G_z,labels=tf.zeros_like(self.D_G_z)))
 
     self.D_loss = D_loss_fake + D_loss_real
-
-    self.G_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
-      logits = self.D_G_z,labels=tf.ones_like(self.D_G_z)))
     
 
     wd_optimizer = tf.train.GradientDescentOptimizer(self.lr)
