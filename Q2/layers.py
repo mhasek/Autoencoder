@@ -2,6 +2,8 @@ import tensorflow as tf
 import numpy as np
 import pdb
 slim = tf.contrib.slim
+from tensorflow.python.layers import convolutional as convolutional_layers
+
 
 def depthwise_conv_factory(x, hidden_num, kernel_size, stride, is_train, reuse):
   vs = tf.get_variable_scope()
@@ -97,34 +99,42 @@ def t_conv_factory(x, hidden_num, output_shape, kernel_size, stride, is_train, r
   vs = tf.get_variable_scope()
   in_channels = x.get_shape()[3]
 
-  x = tf.image.resize_images(x, size=output_shape[1:3], method=tf.image.ResizeMethod.BILINEAR)
+  # x = tf.image.resize_images(x, size=output_shape[1:3], method=tf.image.ResizeMethod.BILINEAR)
 
   W = tf.get_variable('weights', [kernel_size,kernel_size,hidden_num,in_channels],
         initializer = tf.contrib.layers.variance_scaling_initializer())
   # b = tf.get_variable('biases', [1, 1, 1, hidden_num],
   #       initializer = tf.constant_initializer(0.0))
 
-  x = tf.nn.conv2d_transpose(x, W, output_shape=output_shape, strides=[1,stride,stride,1], padding='SAME')
+  x = tf.nn.conv2d_transpose(x, W, output_shape=output_shape, strides=[1,2,2,1], padding='SAME')
 #  x = slim.batch_norm(x, is_training=is_train, reuse=reuse, scale=True,
 #        fused=True, scope=vs, updates_collections=None)
   x = batch_norm(x, is_train=is_train)
-  x = tf.nn.relu(x)
-  # x = leaky_relu(x)
+  # x = tf.nn.relu(x)
+  x = leaky_relu(x)
 #  x = tf.nn.sigmoid(x)
+
+  # out_channels = hidden_num
+  # layer = convolutional_layers.Convolution2DTranspose(
+  #   filters=out_channels,
+  #   kernel_size=kernel_size,
+  #   strides=2,
+  #   padding='SAME')
+  # x = layer.apply(x)
   return x
 
 def t_conv_factory_tanh(x, hidden_num, output_shape, kernel_size, stride, is_train, reuse):
   vs = tf.get_variable_scope()
   in_channels = x.get_shape()[3]
 
-  x = tf.image.resize_images(x, size=output_shape[1:3], method=tf.image.ResizeMethod.BILINEAR)
+  # x = tf.image.resize_images(x, size=output_shape[1:3], method=tf.image.ResizeMethod.BILINEAR)
 
   W = tf.get_variable('weights', [kernel_size,kernel_size,hidden_num,in_channels],
         initializer = tf.contrib.layers.variance_scaling_initializer())
   # b = tf.get_variable('biases', [1, 1, 1, hidden_num],
   #       initializer = tf.constant_initializer(0.0))
 
-  x = tf.nn.conv2d_transpose(x, W, output_shape=output_shape, strides=[1,stride,stride,1], padding='SAME')
+  x = tf.nn.conv2d_transpose(x, W, output_shape=output_shape, strides=[1,2,2,1], padding='SAME')
 #  x = slim.batch_norm(x, is_training=is_train, reuse=reuse, scale=True,
 #        fused=True, scope=vs, updates_collections=None)
   x = batch_norm(x, is_train=is_train)

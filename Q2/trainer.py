@@ -91,7 +91,8 @@ class Trainer(object):
     self.D_G_z = D_out[0:self.batch_size]
     self.D_x = D_out[self.batch_size:]    
 
-    if self.config.is_LSGAN :
+    if self.config.is_LSGAN:
+
       b = 1
       a = 0
       c = 1
@@ -100,6 +101,7 @@ class Trainer(object):
       self.G_loss = 0.5 * tf.reduce_mean((self.D_G_z - c)**2)
 
     else:
+
       D_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
         logits = self.D_x,labels=tf.ones_like(self.D_x)))
 
@@ -190,16 +192,16 @@ class Trainer(object):
           'lr': self.lr,
           'summary': self.summary_op })
 
-      if (step > 2000 and step <= 3000 and D_loss < 0.1) or step < 10:
-        result = self.sess.run(fetch_dict_gen)#, feed_dict =feed_dict )
-        G_loss = result['G_loss']
-        D_loss = result['D_loss']
-      else:
-        result = self.sess.run(fetch_dict_disc)#, feed_dict =feed_dict )
-        result = self.sess.run(fetch_dict_disc)#, feed_dict =feed_dict )
-        D_loss = result['D_loss']
-        result = self.sess.run(fetch_dict_gen)#, feed_dict =feed_dict )
-        G_loss = result['G_loss']
+      # if (step > 2000 and step <= 3000 and D_loss < 0.1) or step < 10:
+      #   result = self.sess.run(fetch_dict_gen)#, feed_dict =feed_dict )
+      #   G_loss = result['G_loss']
+      #   D_loss = result['D_loss']
+      # else:
+      result = self.sess.run(fetch_dict_disc)#, feed_dict =feed_dict )
+      result = self.sess.run(fetch_dict_disc)#, feed_dict =feed_dict )
+      D_loss = result['D_loss']
+      result = self.sess.run(fetch_dict_gen)#, feed_dict =feed_dict )
+      G_loss = result['G_loss']
 
       # if flag or step < 100:
       #   result = self.sess.run(fetch_dict_gen)#, feed_dict =feed_dict )
@@ -270,9 +272,9 @@ class Trainer(object):
             result = self.sess.run(fetch_dict_gen,feed_dict=feed_dict_gen)
 
             idx = i*10 + j
-            im = result['image'][idx,:,:,0]
+            im = result['image'][0,:,:,0]
             images[i*64:(i+1)*64,j*64:(j+1)*64] = im 
-            gen_im = result['G_z'][idx,:,:,0]
+            gen_im = result['G_z'][0,:,:,0]
             gen_images[i*64:(i+1)*64,j*64:(j+1)*64] = gen_im
 
         plt.figure(1)
@@ -301,19 +303,61 @@ class Trainer(object):
 
   def gen_image(self):
     self.saver.restore(self.sess, self.model_dir + '/model.ckpt-0')
-    z1 = np.random.normal(0,1,100).reshape(self.batch_size_eval,100)
-    z2 = np.random.normal(0,1,100).reshape(self.batch_size_eval,100)
 
-    for i,alpha in enumerate(np.linspace(0, 1,20)):
-      noise_in =  np.random.normal(0,alpha,(self.batch_size_eval,100)).reshape(1,100)
-      feed_dict_gen = {self.z_test : noise_in}
-      fetch_dict_gen = {'G_z': self.G_z_test}
-      result = self.sess.run(fetch_dict_gen,feed_dict=feed_dict_gen)
-      result = result['G_z']
+    images = np.zeros((64*10,64*10))
+    gen_images = np.zeros((64*10,64*10))
 
-      # pdb.set_trace()
-      plt.figure(1)
-      plt.title('img%d'%(i))
-      plt.imshow(result[0,:,:,0], cmap='gray')
-      plt.savefig(self.config.model_dir + '/gen_out_im_%d'%(i) +'.png' )
-      plt.close('all')
+    for i in range(10):
+      for j in range(10):
+
+        # fetch_dict_gen = {
+        # 'gen_optim': self.G_optim,
+        # # 'wd_optim': self.wd_optim,
+        # 'G_loss': self.G_loss,
+        # # 'D_x': self.D_x,
+        # 'D_loss': self.D_loss,
+        # # 'D_G_z':self.D_G_z,
+        # # 'G_z': self.G_z
+        # }
+
+        # fetch_dict_disc = {
+        # 'disc_optim': self.D_optim,
+        # # 'wd_optim': self.wd_optim,
+        # 'D_loss': self.D_loss,
+        # # 'D_x': self.D_x,
+        # # 'G_loss': self.G_loss,
+        # # 'D_G_z':self.D_G_z,
+        # # 'G_z': self.G_z
+        # }
+        # result = self.sess.run(fetch_dict_gen)
+
+        z_test = np.random.uniform(-1,1,
+          size=[self.batch_size_eval,100]).astype(np.float32)
+
+        print (z_test)
+    
+        feed_dict_gen = {self.z_test : z_test}
+
+        fetch_dict_gen = {'G_z': self.G_z_test,
+                          'D_G_z': self.D_G_z_test,
+                          'image': self.x}
+        result = self.sess.run(fetch_dict_gen,feed_dict=feed_dict_gen)
+
+        pdb.set_trace()
+        idx = i*10 + j
+        im = result['image'][0,:,:,0]
+        images[i*64:(i+1)*64,j*64:(j+1)*64] = im 
+        gen_im = result['G_z'][0,:,:,0]
+        gen_images[i*64:(i+1)*64,j*64:(j+1)*64] = gen_im
+
+    plt.figure(1)
+    plt.title('org_imgs')
+    plt.imshow(images, cmap='gray')
+    plt.savefig(self.config.model_dir + '/org_imgs_iter' +'.png' )
+    plt.close('all')
+
+    plt.figure(1)
+    plt.title('gen_imgs_iter')
+    plt.imshow(gen_images, cmap='gray')
+    plt.savefig(self.config.model_dir + '/gen_imgs_iter' +'.png' )
+    plt.close('all')
